@@ -1,16 +1,54 @@
-body {
-    padding-top: 60px;
+// 🔹 1. Importando o tema do Angular Material
+@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+@import '~@angular/cdk/overlay-prebuilt.css';
+@import '~@angular/cdk/a11y-prebuilt.css';
+
+
+// 🔹 2. Reset CSS para garantir consistência entre navegadores
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.backdrop {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 999;
+
+html, body {
+  height: 100%;
+  font-family: Roboto, Arial, sans-serif;
+  background-color: #f4f4f4;
 }
-@media (min-width: 992px) {
-    body {
-        padding-top: 0;
-    }
+
+// 🔹 3. Definição de variáveis globais (cores e estilos reutilizáveis)
+:root {
+  --primary-color: #2030bd;
+  --accent-color: #48ff00;
+  --background-color: #f4f4f4;
+  --text-color: #333;
+  --border-radius: 8px;
+}
+
+
+// 🔹 6. Melhorando inputs e formulários
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+// 🔹 7. Classe utilitária para esconder elementos
+.hidden {
+  display: none !important;
+}
+
+// 🔹 8. Ajustes responsivos (Mobile First)
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
 }

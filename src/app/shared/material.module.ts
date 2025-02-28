@@ -11,6 +11,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { LayoutModule } from '@angular/cdk/layout';
 
 @NgModule({
   imports: [
@@ -25,7 +34,15 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatFormFieldModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatSidenavModule,
+    MatListModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatSnackBarModule,
   ],
   exports: [
     MatButtonModule,
@@ -39,7 +56,16 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatFormFieldModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatSidenavModule,
+    MatListModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatSnackBarModule,
+    LayoutModule
   ],
   declarations: []
 })

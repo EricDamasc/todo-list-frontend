@@ -1,31 +1,45 @@
-<h2 mat-dialog-title>Criar Tarefa</h2>
+<h2 mat-dialog-title class="dialog-title">{{ data.task ? 'Editar Tarefa' : 'Criar Tarefa' }}</h2>
 <mat-dialog-content>
-  <form [formGroup]="taskForm">
-    <mat-form-field>
-      <mat-label>Título</mat-label>
-      <input matInput formControlName="title">
+  <form [formGroup]="taskForm" class="task-form">
+    <div class="form-row">
+      <mat-form-field appearance="fill" class="form-field">
+        <mat-label for="title">Título</mat-label>
+        <mat-icon matPrefix>title</mat-icon>
+        <input matInput id="title" formControlName="title">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="form-field">
+        <mat-label for="due_date">Data de Entrega</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput id="due_date" [matDatepicker]="picker" formControlName="due_date">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="fill" class="form-field">
+      <mat-label for="description">Descrição</mat-label>
+      <mat-icon matPrefix>description</mat-icon>
+      <textarea matInput id="description" formControlName="description"></textarea>
     </mat-form-field>
-    <mat-form-field>
-      <mat-label>Descrição</mat-label>
-      <textarea matInput formControlName="description"></textarea>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Data de Entrega</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="due_date">
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Prioridade</mat-label>
-      <mat-select formControlName="priority">
-        <mat-option value="alta">Alta</mat-option>
-        <mat-option value="média">Média</mat-option>
-        <mat-option value="baixa">Baixa</mat-option>
+    <mat-form-field appearance="fill" class="form-field">
+      <mat-label for="priority">Prioridade</mat-label>
+      <mat-select id="priority" formControlName="priority">
+        <mat-option value="alta">
+          <mat-icon class="priority-icon high">priority_high</mat-icon>
+          Alta
+        </mat-option>
+        <mat-option value="média">
+          <mat-icon class="priority-icon medium">priority_high</mat-icon>
+          Média
+        </mat-option>
+        <mat-option value="baixa">
+          <mat-icon class="priority-icon low">priority_high</mat-icon>
+          Baixa
+        </mat-option>
       </mat-select>
     </mat-form-field>
   </form>
 </mat-dialog-content>
-<mat-dialog-actions>
+<mat-dialog-actions align="end">
   <button mat-button (click)="onNoClick()">Cancelar</button>
-  <button mat-button color="primary" (click)="onSubmit()">Criar</button>
+  <button mat-button color="primary" (click)="onSubmit()">Salvar</button>
 </mat-dialog-actions>

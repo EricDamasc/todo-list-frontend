@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task } from 'src/app/models/task.model';
 
@@ -12,7 +12,7 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   private getHeaders() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('acess_token');
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
@@ -25,21 +25,21 @@ export class TaskService {
   }
 
   createTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(`${this.apiUrl}/tasks`, task, {
-      headers: this.getHeaders(),
-    });
+    const user_id = task.user_id;
+    const params = new HttpParams().set('user_id', user_id);
+    return this.http.post<Task>(`${this.apiUrl}/tasks`, [task], { params });
   }
 
   updateTask(task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/tasks/${task.task_id}`, task, {
+    return this.http.put<Task>(`${this.apiUrl}/tasks/${task.task_id}&${task.user_id}`, task, {
       headers: this.getHeaders(),
     });
   }
 
-  deleteTask(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`, {
-      headers: this.getHeaders(),
-    });
+  deleteTask(user_id: string, id: string): Observable<void> {
+    const params = new HttpParams()
+      .set('user_id', user_id);
+    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`, { params });
   }
 
 }
