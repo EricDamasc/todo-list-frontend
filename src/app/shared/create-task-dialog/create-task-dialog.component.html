@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Criar Tarefa</h2>
+<mat-dialog-content>
+  <form [formGroup]="taskForm">
+    <mat-form-field>
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="title">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Data de Entrega</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="due_date">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Prioridade</mat-label>
+      <mat-select formControlName="priority">
+        <mat-option value="alta">Alta</mat-option>
+        <mat-option value="média">Média</mat-option>
+        <mat-option value="baixa">Baixa</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button color="primary" (click)="onSubmit()">Criar</button>
+</mat-dialog-actions>

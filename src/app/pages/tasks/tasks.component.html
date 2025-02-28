@@ -1,0 +1,40 @@
+<div class="header">
+  <div class="menu">
+    <button mat-button [matMenuTriggerFor]="menu" #menuTrigger>Menu</button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="openCreateTaskDialog()">Criar Tarefa</button>
+    </mat-menu>
+  </div>
+  <div class="user-info">
+    <span>{{ userName }}</span>
+    <button mat-button (click)="logout()">Sair</button>
+  </div>
+</div>
+
+<div class="tasks-container">
+  <mat-card *ngFor="let task of tasks" class="task-card" [ngClass]="getPriorityClass(task.priority)">
+    <mat-card-header>
+      <mat-checkbox class="task-checkbox" [(ngModel)]="task.completed" (change)="toggleCompleted(task)">
+      </mat-checkbox>
+      <mat-card-title class="task-title">{{ task.title }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p class="task-description">{{ task.description }}</p>
+      <p><strong>Data de entrega:</strong> {{ task.due_date | date: 'dd/MM/yyyy' }}</p>
+      <p><strong>Prioridade:</strong> {{ task.priority }}</p>
+      <p><strong>ID do Usuário:</strong> {{ task.user_id }}</p>
+    </mat-card-content>
+
+    <mat-card-footer>
+      <div class="task-actions">
+        <button mat-icon-button (click)="updateTask(task)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button (click)="deleteTask(task.task_id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </mat-card-footer>
+  </mat-card>
+</div>
