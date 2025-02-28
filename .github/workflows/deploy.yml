@@ -1,0 +1,41 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET_NAME: todo-list-angular-app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔄 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 📦 Instalar dependências
+        run: npm install
+
+      - name: 🏗️ Construir o projeto
+        run: npm run build:prod
+
+      - name: 🔐 Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🚀 Fazer upload para o S3
+        run: aws s3 sync dist/todo-list-frontend/ s3://${{ env.BUCKET_NAME }} --delete
+
+      - name: 🔄 Invalida o cache do CloudFront (se necessário)
+        run: |
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[0].DomainName=='${{ env.BUCKET_NAME }}.s3.amazonaws.com'].Id" --output text)
+          if [ "$DISTRIBUTION_ID" != "None" ]; then
+            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+          fi
