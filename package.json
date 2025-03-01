@@ -1,5 +1,5 @@
 {
-  "name": "todoList",
+  "name": "todo-list-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -12,7 +12,7 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^15.1.0",
+    "@angular/animations": "^15.2.10",
     "@angular/cdk": "^15.2.0",
     "@angular/common": "^15.1.0",
     "@angular/compiler": "^15.1.0",
