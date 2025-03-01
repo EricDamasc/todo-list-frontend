@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Task } from '../../models/task.model';
 import { TaskService } from './task.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { CreateTaskDialogComponent } from '../../shared/create-task-dialog/create-task-dialog.component';
-import { Observable, of } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
