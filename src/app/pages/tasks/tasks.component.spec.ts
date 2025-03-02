@@ -1,162 +1,229 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatMenuModule } from '@angular/material/menu';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { of } from 'rxjs';
 import { TasksComponent } from './tasks.component';
 import { TaskService } from './task.service';
 import { AuthService } from '../../services/auth.service';
-import { Task } from '../../models/task.model';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { AppModule } from 'src/app/app.module';
 import { MaterialModule } from 'src/app/shared/material.module';
+import { MatMenu, MatMenuModule } from '@angular/material/menu';
 
 describe('TasksComponent', () => {
   let component: TasksComponent;
   let fixture: ComponentFixture<TasksComponent>;
-  let taskServiceMock: any;
-  let authServiceMock: any;
-  let dialogMock: any;
-  let snackBarMock: any;
-  let routerMock: any;
+  let taskService: jasmine.SpyObj<TaskService>;
+  let authService: jasmine.SpyObj<AuthService>;
+  let router: jasmine.SpyObj<Router>;
+  let snackBar: jasmine.SpyObj<MatSnackBar>;
+  let dialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(async () => {
-    taskServiceMock = {
-      getTasks: jasmine.createSpy('getTasks').and.returnValue(of([])),
-      createTask: jasmine.createSpy('createTask').and.returnValue(of({})),
-      updateTask: jasmine.createSpy('updateTask').and.returnValue(of({})),
-      deleteTask: jasmine.createSpy('deleteTask').and.returnValue(of({}))
-    };
-
-    authServiceMock = {
-      getUserEmail: jasmine.createSpy('getUserEmail').and.returnValue('test@example.com'),
-      logout: jasmine.createSpy('logout')
-    };
-
-    dialogMock = {
-      open: jasmine.createSpy('open').and.returnValue({
-        afterClosed: () => of(true)
-      }),
-      closeAll: jasmine.createSpy('closeAll')
-    };
-
-    snackBarMock = {
-      open: jasmine.createSpy('open')
-    };
-
-    routerMock = {
-      navigate: jasmine.createSpy('navigate')
-    };
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', [
+      'getTasks',
+      'createTask',
+      'updateTask',
+      'deleteTask',
+    ]);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', [
+      'getUserEmail',
+      'logout',
+    ]);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    const dialogSpy = jasmine.createSpyObj('MatDialog', ['open', 'closeAll']);
 
     await TestBed.configureTestingModule({
       declarations: [TasksComponent],
       imports: [
+        NoopAnimationsModule,
+        MatPaginatorModule,
+        BrowserDynamicTestingModule,
         AppModule,
         MaterialModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatSnackBarModule,
         MatMenuModule,
-        HttpClientTestingModule,
-        RouterTestingModule,
-        ReactiveFormsModule
       ],
       providers: [
-        { provide: TaskService, useValue: taskServiceMock },
-        { provide: AuthService, useValue: authServiceMock },
-        { provide: MatDialog, useValue: dialogMock },
-        { provide: MatSnackBar, useValue: snackBarMock },
-        FormBuilder
-      ]
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: MatSnackBar, useValue: snackBarSpy },
+        { provide: MatDialog, useValue: dialogSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TasksComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    taskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+    dialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+
+    authService.getUserEmail.and.returnValue('test@example.com');
+    taskService.getTasks.and.returnValue(of([]));
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should load tasks on init', () => {
+    component.ngOnInit();
+    expect(taskService.getTasks).toHaveBeenCalled();
   });
 
-  // it('should load tasks on init', () => {
-  //   expect(taskServiceMock.getTasks).toHaveBeenCalled();
-  // });
+  it('should apply filters and update paginated tasks', () => {
+    component.tasks = [
+      {
+        task_id: '1',
+        user_id: 'user1',
+        title: 'Task 1',
+        description: 'Description 1',
+        completed: false,
+        created_at: '2025-02-01',
+        due_date: '2025-03-01',
+        priority: 'alta',
+      },
+      {
+        task_id: '2',
+        user_id: 'user2',
+        title: 'Task 2',
+        description: 'Description 2',
+        completed: true,
+        created_at: '2025-02-02',
+        due_date: '2025-03-02',
+        priority: 'média',
+      },
+    ];
+    component.applyFilters();
+    expect(component.filteredTasks.length).toBe(2);
+    expect(component.paginatedTasks.length).toBe(2);
+  });
 
-  // it('should apply filters correctly', () => {
-  //   component.tasks = [
-  //     { task_id: '1', title: 'Task 1', description: '', due_date: '', priority: 'alta', completed: false, created_at: '', user_id: '' },
-  //     { task_id: '2', title: 'Task 2', description: '', due_date: '', priority: 'média', completed: false, created_at: '', user_id: '' }
-  //   ];
-  //   component.selectedPriority = 'alta';
-  //   component.searchText = 'Task 1';
-  //   component.applyFilters();
-  //   expect(component.filteredTasks.length).toBe(1);
-  //   expect(component.filteredTasks[0].title).toBe('Task 1');
-  // });
+  it('should handle page change', () => {
+    component.filteredTasks = Array.from({ length: 20 }, (_, i) => ({
+      task_id: `${i + 1}`,
+      user_id: `user${i + 1}`,
+      title: `Task ${i + 1}`,
+      description: `Description ${i + 1}`,
+      completed: false,
+      created_at: '2025-02-01',
+      due_date: '2025-03-01',
+      priority: 'alta',
+    }));
+    component.onPageChange({ pageIndex: 1, pageSize: 10, length: 20 });
+    expect(component.currentPage).toBe(1);
+    expect(component.pageSize).toBe(10);
+    expect(component.paginatedTasks.length).toBe(10);
+  });
 
-  // it('should add a task', () => {
-  //   component.addTask('New Task', 'Description', '2025-03-01', 'alta');
-  //   expect(taskServiceMock.createTask).toHaveBeenCalled();
-  // });
+  it('should add a task', () => {
+    const newTask = {
+      task_id: '3',
+      user_id: 'user3',
+      title: 'Task 3',
+      description: 'Description 3',
+      completed: false,
+      created_at: '2025-02-03',
+      due_date: '2025-03-03',
+      priority: 'baixa',
+    };
+    taskService.createTask.and.returnValue(of(newTask));
+    component.addTask('Task 3', 'Description 3', '2025-03-03', 'baixa');
+    expect(taskService.createTask).toHaveBeenCalled();
+  });
 
-  // it('should update a task', () => {
-  //   const task: Task = { task_id: '1', title: 'Updated Task', description: '', due_date: '', priority: 'alta', completed: false, created_at: '', user_id: '' };
-  //   component.updateTask(task);
-  //   expect(taskServiceMock.updateTask).toHaveBeenCalledWith(task);
-  // });
+  it('should handle task creation error', () => {
+    taskService.createTask.and.returnValue(throwError('error'));
+    component.addTask('Task 3', 'Description 3', '2025-03-03', 'baixa');
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Erro ao adicionar tarefa ❌',
+      '',
+      {
+        duration: 4000,
+        panelClass: 'error',
+        horizontalPosition: 'center',
+        announcementMessage: 'Erro!',
+      }
+    );
+  });
+  it('should update a task', () => {
+    const updatedTask = {
+      task_id: '1',
+      user_id: 'user1',
+      title: 'Updated Task 1',
+      description: 'Updated Description 1',
+      completed: false,
+      created_at: '2025-02-01',
+      due_date: '2025-03-01',
+      priority: 'alta',
+    };
+    taskService.updateTask.and.returnValue(of(updatedTask));
+    component.updateTask(updatedTask);
+    expect(taskService.updateTask).toHaveBeenCalled();
+  });
 
-  // it('should delete a task', () => {
-  //   component.deleteTask('user_id', 'task_id');
-  //   expect(dialogMock.open).toHaveBeenCalled();
-  // });
+  it('should handle task update error', () => {
+    taskService.updateTask.and.returnValue(throwError('error'));
+    component.updateTask({
+      task_id: '1',
+      user_id: 'user1',
+      title: 'Task 1',
+      description: 'Description 1',
+      completed: false,
+      created_at: '2025-02-01',
+      due_date: '2025-03-01',
+      priority: 'alta',
+    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Erro ao atualizar tarefa tarefa ❌',
+      '',
+      {
+        duration: 4000,
+        panelClass: 'error',
+        horizontalPosition: 'center',
+        announcementMessage: 'Erro!',
+      }
+    );
+  });
 
-  // it('should show notification', () => {
-  //   component.showNotification('Test message', 'success');
-  //   expect(snackBarMock.open).toHaveBeenCalledWith('Test message', '', {
-  //     duration: 4000,
-  //     panelClass: 'success',
-  //     horizontalPosition: 'center',
-  //     announcementMessage: 'Sucesso!'
-  //   });
-  // });
+  it('should delete a task', () => {
+    taskService.deleteTask.and.returnValue(of(void 0));
+    component.deleteTask('user1', '1');
+    expect(taskService.deleteTask).toHaveBeenCalled();
+  });
 
-  // it('should open create task dialog', () => {
-  //   component.openCreateTaskDialog();
-  //   expect(dialogMock.open).toHaveBeenCalled();
-  // });
+  it('should open and close dialogs', () => {
+    component.openHelpDialog();
+    expect(dialog.open).toHaveBeenCalled();
+    component.closeHelpDialog();
+    expect(dialog.closeAll).toHaveBeenCalled();
+  });
 
-  // it('should open edit task dialog', () => {
-  //   const task: Task = { task_id: '1', title: 'Task', description: '', due_date: '', priority: 'alta', completed: false, created_at: '', user_id: '' };
-  //   component.openEditTaskDialog(task);
-  //   expect(dialogMock.open).toHaveBeenCalled();
-  // });
+  it('should logout and navigate to login', () => {
+    component.logout();
+    expect(authService.logout).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
 
-  // it('should toggle task completion', () => {
-  //   const task: Task = { task_id: '1', title: 'Task', description: '', due_date: '', priority: 'alta', completed: false, created_at: '', user_id: '' };
-  //   component.toggleCompleted(task);
-  //   expect(task.completed).toBe(true);
-  // });
-
-  // it('should share task via WhatsApp', () => {
-  //   const task: Task = { task_id: '1', title: 'Task', description: '', due_date: '', priority: 'alta', completed: false, created_at: '', user_id: '' };
-  //   component.shareTaskViaWhatsApp(task);
-  //   expect(dialogMock.open).toHaveBeenCalled();
-  // });
-
-  // it('should share task via email', () => {
-  //   const task: Task = { task_id: '1', title: 'Task', description: '', due_date: '', priority: 'alta', completed: false, created_at: '', user_id: '' };
-  //   spyOn(window, 'open');
-  //   component.shareTaskViaEmail(task);
-  //   expect(window.open).toHaveBeenCalled();
-  // });
-
-  // it('should open about dialog', () => {
-  //   component.openAboutDialog();
-  //   expect(dialogMock.open).toHaveBeenCalled();
-  // });
-
-  // it('should close about dialog', () => {
-  //   component.closeAboutDialog();
-  //   expect(dialogMock.closeAll).toHaveBeenCalled();
-  // });
+  it('should share task via Email', () => {
+    const task = {
+      task_id: '1',
+      user_id: 'user1',
+      title: 'Task 1',
+      description: 'Description 1',
+      completed: false,
+      created_at: '2025-02-01',
+      due_date: '2025-03-01',
+      priority: 'alta',
+    };
+    spyOn(window, 'open');
+    component.shareTaskViaEmail(task);
+    expect(window.open).toHaveBeenCalled();
+  });
 });

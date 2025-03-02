@@ -18,7 +18,8 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     authServiceMock = {
-      login: jasmine.createSpy('login').and.returnValue(of({ access_token: 'test_token' }))
+      login: jasmine.createSpy('login').and.returnValue(of({ access_token: 'test_token' })),
+      register: jasmine.createSpy('register').and.returnValue(of({ success: true }))
     };
 
     routerMock = {
@@ -50,54 +51,97 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call authService.login on login', () => {
-    const email = 'test@example.com';
-    const password = 'password';
-    component.email = email;
-    component.password = password;
-
-    component.login();
-
-    expect(authServiceMock.login).toHaveBeenCalledWith(email, password);
+  it('should switch mode', () => {
+    component.isLoginMode = true;
+    component.onSwitchMode();
+    expect(component.isLoginMode).toBeFalse();
+    component.onSwitchMode();
+    expect(component.isLoginMode).toBeTrue();
   });
 
-  it('should store access_token in localStorage and navigate to /tasks on successful login', () => {
-    const email = 'test@example.com';
-    const password = 'password';
-    component.email = email;
-    component.password = password;
+  it('should login successfully', () => {
+    component.isLoginMode = true;
+    component.email = 'test@example.com';
+    component.password = 'password';
+    const form = { valid: true, reset: jasmine.createSpy('reset') } as any;
 
-    component.login();
+    component.onSubmit(form);
 
-    expect(localStorage.getItem('access_token')).toBe('test_token');
+    expect(authServiceMock.login).toHaveBeenCalledWith('test@example.com', 'password');
     expect(routerMock.navigate).toHaveBeenCalledWith(['/tasks']);
+    expect(component.carregando).toBeFalse();
   });
 
-  it('should emit loginSuccess on successful login', () => {
-    spyOn(component.loginSuccess, 'emit');
-
-    component.login();
-
-    expect(component.loginSuccess.emit).toHaveBeenCalled();
-  });
-
-  it('should alert on failed login due to invalid token', () => {
-    authServiceMock.login.and.returnValue(of({}));
-
-    spyOn(window, 'alert');
-
-    component.login();
-
-    expect(window.alert).toHaveBeenCalledWith('Login falhou! Token inválido.');
-  });
-
-  it('should alert on failed login due to error', () => {
+  it('should handle login error', () => {
     authServiceMock.login.and.returnValue(throwError('error'));
+    component.isLoginMode = true;
+    component.email = 'test@example.com';
+    component.password = 'password';
+    const form = { valid: true, reset: jasmine.createSpy('reset') } as any;
 
     spyOn(window, 'alert');
+    component.onSubmit(form);
 
-    component.login();
-
+    expect(authServiceMock.login).toHaveBeenCalledWith('test@example.com', 'password');
     expect(window.alert).toHaveBeenCalledWith('Login falhou! Verifique suas credenciais.');
+    expect(component.carregando).toBeFalse();
+  });
+
+  it('should register successfully', () => {
+    component.isLoginMode = false;
+    component.username = 'testuser';
+    component.email = 'test@example.com';
+    component.password = 'password';
+    component.confirmPassword = 'password';
+    const form = { valid: true, reset: jasmine.createSpy('reset') } as any;
+
+    spyOn(window, 'alert');
+    component.onSubmit(form);
+
+    expect(authServiceMock.register).toHaveBeenCalledWith('testuser', 'test@example.com', 'password');
+    expect(window.alert).toHaveBeenCalledWith('Registro bem-sucedido! Faça login para continuar.');
+    expect(component.isLoginMode).toBeTrue();
+    expect(component.carregando).toBeFalse();
+  });
+
+  it('should handle register error', () => {
+    authServiceMock.register.and.returnValue(throwError('error'));
+    component.isLoginMode = false;
+    component.username = 'testuser';
+    component.email = 'test@example.com';
+    component.password = 'password';
+    component.confirmPassword = 'password';
+    const form = { valid: true, reset: jasmine.createSpy('reset') } as any;
+
+    spyOn(window, 'alert');
+    component.onSubmit(form);
+
+    expect(authServiceMock.register).toHaveBeenCalledWith('testuser', 'test@example.com', 'password');
+    expect(window.alert).toHaveBeenCalledWith('Registro falhou! Tente novamente.');
+    expect(component.carregando).toBeFalse();
+  });
+
+  it('should not submit if form is invalid', () => {
+    const form = { valid: false, reset: jasmine.createSpy('reset') } as any;
+
+    component.onSubmit(form);
+
+    expect(authServiceMock.login).not.toHaveBeenCalled();
+    expect(authServiceMock.register).not.toHaveBeenCalled();
+  });
+
+  it('should not register if passwords do not match', () => {
+    component.isLoginMode = false;
+    component.username = 'testuser';
+    component.email = 'test@example.com';
+    component.password = 'password';
+    component.confirmPassword = 'differentpassword';
+    const form = { valid: true, reset: jasmine.createSpy('reset') } as any;
+
+    spyOn(console, 'error');
+    component.onSubmit(form);
+
+    expect(console.error).toHaveBeenCalledWith('As senhas não coincidem');
+    expect(authServiceMock.register).not.toHaveBeenCalled();
   });
 });
