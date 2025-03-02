@@ -12,7 +12,7 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   private getHeaders() {
-    const token = localStorage.getItem('acess_token');
+    const token = localStorage.getItem('access_token');
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
@@ -27,19 +27,17 @@ export class TaskService {
   createTask(task: Task): Observable<Task> {
     const user_id = task.user_id;
     const params = new HttpParams().set('user_id', user_id);
-    return this.http.post<Task>(`${this.apiUrl}/tasks`, [task], { params });
+    return this.http.post<Task>(`${this.apiUrl}/tasks`, [task], { params, headers: this.getHeaders() });
   }
 
   updateTask(task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/tasks/${task.task_id}&${task.user_id}`, task, {
+    return this.http.put<Task>(`${this.apiUrl}/tasks/${task.task_id}`, task, {
       headers: this.getHeaders(),
     });
   }
 
   deleteTask(user_id: string, id: string): Observable<void> {
-    const params = new HttpParams()
-      .set('user_id', user_id);
-    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`, { params });
+    const params = new HttpParams().set('user_id', user_id);
+    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`, { params, headers: this.getHeaders() });
   }
-
 }

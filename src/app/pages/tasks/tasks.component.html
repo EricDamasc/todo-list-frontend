@@ -12,11 +12,7 @@
         <mat-icon>add</mat-icon>
         Criar Tarefa
       </button>
-      <button mat-menu-item>
-        <mat-icon>settings</mat-icon>
-        Configurações
-      </button>
-      <button mat-menu-item>
+      <button mat-menu-item (click)="openHelpDialog()">
         <mat-icon>help</mat-icon>
         Ajuda
       </button>
@@ -25,7 +21,51 @@
         Sobre
       </button>
     </mat-menu>
-    
+
+    <ng-template #helpDialog>
+      <h2 mat-dialog-title>
+        Ajuda
+        <mat-icon>help</mat-icon>
+      </h2>
+      <mat-dialog-content>
+        <p>Aqui você pode encontrar informações sobre como usar o aplicativo:</p>
+        <ul>
+          <li>
+            <mat-icon>add_circle</mat-icon>
+            <strong>Criar Tarefa: </strong>  Clique no botão "Criar Tarefa" no menu para adicionar uma nova tarefa.
+          </li>
+          <li>
+            <mat-icon>edit</mat-icon>
+            <strong>Editar Tarefa: </strong>  Clique no ícone de lápis em uma tarefa para editá-la. Você pode alterar o título, descrição, data de entrega e prioridade.
+          </li>
+          <li>
+            <mat-icon>delete</mat-icon>
+            <strong>Excluir Tarefa: </strong>  Clique no ícone de lixeira em uma tarefa para excluí-la. Uma confirmação será solicitada antes da exclusão.
+          </li>
+          <li>
+            <mat-icon>share</mat-icon>
+            <strong>Compartilhar Tarefa: </strong>  Clique no ícone de compartilhamento em uma tarefa para compartilhá-la via WhatsApp ou Email.
+          </li>
+          <li>
+            <mat-icon>check_box</mat-icon>
+            <strong>Concluir Tarefa: </strong>  Marque a caixa de seleção em uma tarefa para marcá-la como concluída. Clique novamente para desmarcar.
+          </li>
+          <li>
+            <mat-icon>palette</mat-icon>
+            <strong>Legendas de Cores: </strong>  As tarefas são destacadas com cores diferentes com base na prioridade:
+            <ul style="display: flex; margin-inline: 10px;">
+              <li><span class="legend-color baixa"></span> <strong>Baixa:</strong> Cor verde.</li>
+              <li><span class="legend-color media"></span> <strong>Média:</strong> Cor amarela.</li>
+              <li><span class="legend-color alta"></span> <strong>Alta:</strong> Cor vermelha.</li>
+            </ul>
+          </li>
+        </ul>
+      </mat-dialog-content>
+      <mat-dialog-actions align="end">
+        <button mat-button (click)="closeHelpDialog()" color="primary">Fechar</button>
+      </mat-dialog-actions>
+    </ng-template>
+
     <ng-template #aboutDialog>
       <h2 mat-dialog-title>
         <mat-icon>info</mat-icon>
@@ -49,6 +89,7 @@
       </mat-dialog-actions>
     </ng-template>
   </div>
+
   <div class="title">
     <h1 class="title-text">Minhas Tarefas</h1>
     <mat-icon class="title-icon">assignment</mat-icon>
@@ -97,76 +138,145 @@
 </div>
 
 <div class="tasks-container">
-  <mat-card *ngFor="let task of filteredTasks" class="task-card" [ngClass]="getPriorityClass(task.priority)">
-    <mat-card-header>
-      <div class="task-header">
-        <mat-icon *ngIf="taskChanged[task.task_id]" mat-button (click)="updateTask(task)">save</mat-icon>
-        <mat-checkbox class="task-checkbox" [(ngModel)]="task.completed" (change)="toggleCompleted(task)">
-        </mat-checkbox>
-        <mat-card-title class="task-title">{{ task.title }}</mat-card-title>
-      </div>
-    </mat-card-header>
+  <ng-container *ngIf="filteredTasks.length > 0; else noTasksTemplate">
+    <mat-card *ngFor="let task of paginatedTasks" class="task-card" [ngClass]="getPriorityClass(task.priority)">
+      <mat-card-header>
+        <div class="task-header">
+          <mat-checkbox class="task-checkbox" [(ngModel)]="task.completed" (change)="openConfirmUpdateDialog(task)">
+          </mat-checkbox>
+          <mat-card-title class="task-title">{{ task.title }}</mat-card-title>
+        </div>
+      </mat-card-header>
 
-    <mat-card-content>
-      <p class="task-description">{{ task.description }}</p>
-      <mat-list>
-        <mat-list-item class="task-detail">
-          <mat-icon>calendar_today</mat-icon>
-          <strong>Data de criação:</strong>
-          <span>{{ task.created_at | date: 'dd/MM/yyyy' }}</span>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item class="task-detail">
-          <mat-icon>event</mat-icon>
-          <strong>Previsão de entrega:</strong>
-          <span>{{ task.due_date | date: 'dd/MM/yyyy' }}</span>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item class="task-detail">
-          <mat-icon>check_circle</mat-icon>
-          <strong>Concluída:</strong>
-          <span>{{ task.completed ? 'Sim' : 'Não' }}</span>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item class="task-detail">
-          <mat-icon>priority_high</mat-icon>
-          <strong>Prioridade:</strong>
-          <span>{{ task.priority }}</span>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item class="task-detail">
-          <mat-icon>person</mat-icon>
-          <strong>ID do Usuário:</strong>
-          <span>{{ task.user_id }}</span>
-        </mat-list-item>
-      </mat-list>
-    </mat-card-content>
+      <mat-card-content>
+        <p class="task-description">{{ task.description }}</p>
+        <mat-list>
+          <mat-list-item class="task-detail">
+            <mat-icon>calendar_today</mat-icon>
+            <strong>Data de criação:</strong>
+            <span>{{ task.created_at | date: 'dd/MM/yyyy' }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item class="task-detail">
+            <mat-icon>event</mat-icon>
+            <strong>Previsão de entrega:</strong>
+            <span *ngIf="task.due_date && task.due_date !== 'invalid-date'">{{ task.due_date | date: 'dd/MM/yyyy' }}</span>
+            <span *ngIf="!task.due_date || task.due_date === 'invalid-date'">Data inválida</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item class="task-detail">
+            <mat-icon>check_circle</mat-icon>
+            <strong>Concluída:</strong>
+            <span>{{ task.completed ? 'Sim' : 'Não' }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item class="task-detail">
+            <mat-icon>priority_high</mat-icon>
+            <strong>Prioridade:</strong>
+            <span>{{ task.priority }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item class="task-detail">
+            <mat-icon>person</mat-icon>
+            <strong>ID do Usuário:</strong>
+            <span>{{ task.user_id }}</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
 
-    <mat-card-footer>
-      <div class="task-actions">
-        <button mat-icon-button (click)="openEditTaskDialog(task)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button (click)="deleteTask(task.user_id, task.task_id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-        <button mat-icon-button [matMenuTriggerFor]="shareMenu">
-          <mat-icon>share</mat-icon>
-        </button>
-        <mat-menu #shareMenu="matMenu">
-          <button mat-menu-item (click)="shareTaskViaWhatsApp(task)">
-            <mat-icon>whatsapp</mat-icon>
-            WhatsApp
+      <mat-card-footer>
+        <div class="task-actions">
+          <button mat-icon-button (click)="openEditTaskDialog(task)">
+            <mat-icon>edit</mat-icon>
           </button>
-          <button mat-menu-item (click)="shareTaskViaEmail(task)">
-            <mat-icon>email</mat-icon>
-            Email
+          <button mat-icon-button (click)="deleteTask(task.user_id, task.task_id)">
+            <mat-icon>delete</mat-icon>
           </button>
-        </mat-menu>
-      </div>
-    </mat-card-footer>
-  </mat-card>
+          <button mat-icon-button [matMenuTriggerFor]="shareMenu">
+            <mat-icon>share</mat-icon>
+          </button>
+          <mat-menu #shareMenu="matMenu">
+            <button mat-menu-item (click)="shareTaskViaWhatsApp(task)">
+              <img src="../../../assets/ico/whatsapp.ico" alt="WhatsApp" class="icon">
+              WhatsApp
+            </button>
+            <button mat-menu-item (click)="shareTaskViaEmail(task)">
+              <mat-icon>email</mat-icon>
+              Email
+            </button>
+          </mat-menu>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+    <mat-paginator [length]="filteredTasks.length" [pageSize]="10" [pageSizeOptions]="[5, 10, 20]" (page)="onPageChange($event)">
+    </mat-paginator>
+  </ng-container>
+
+  <ng-template #noTasksTemplate>
+    <div class="no-tasks">
+      <mat-icon class="no-tasks-icon" color="primary">assignment_turned_in</mat-icon>
+      <p>Você ainda não tem Tarefas Criadas.</p>
+      <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
+        <mat-icon (click)="openCreateTaskDialog()">add</mat-icon>
+        Criar Nova Tarefa
+      </button>
+    </div>
+  </ng-template>
 </div>
+
+<ng-template #confirmUpdateDialog let-task="data">
+  <h2 mat-dialog-title>
+    Confirmar Atualização
+    <mat-icon color="primary">help_outline</mat-icon>
+  </h2>
+  <mat-dialog-content>
+    <p>Você quer alterar o status de conclusão da tarefa <strong>{{ task.title }}</strong>?</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeConfirmUpdateDialog(task)">Cancelar</button>
+    <button mat-button color="primary" (click)="updateTask(task)">Confirmar</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<ng-template #phoneNumberDialog>
+  <h2 mat-dialog-title>
+    <mat-icon>share</mat-icon>
+    Compartilhar via WhatsApp
+  </h2>
+  <mat-dialog-content>
+    <form [formGroup]="phoneForm">
+      <mat-form-field appearance="fill">
+        <mat-label>Número de Telefone</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input matInput formControlName="phoneNumber" placeholder="+5511999999999">
+        <mat-error *ngIf="phoneForm?.get('phoneNumber')?.hasError('required')">
+          O número de telefone é obrigatório
+        </mat-error>
+        <mat-error *ngIf="phoneForm?.get('phoneNumber')?.hasError('pattern')">
+          Formato de número inválido
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancelar</button>
+    <button mat-button color="primary" (click)="onShare()">Compartilhar</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<ng-template #confirmUpdateDialog let-task="data">
+  <h2 mat-dialog-title>
+    Confirmar Atualização
+    <mat-icon color="primary">help_outline</mat-icon>
+  </h2>
+  <mat-dialog-content>
+    <p>Você quer alterar o status de conclusão da tarefa <strong>{{ task.title }}</strong>?</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeConfirmUpdateDialog(task)">Cancelar</button>
+    <button mat-button color="primary" (click)="updateTask(task)">Confirmar</button>
+  </mat-dialog-actions>
+</ng-template>
 
 <ng-template #phoneNumberDialog>
   <h2 mat-dialog-title>

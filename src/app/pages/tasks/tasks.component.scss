@@ -245,3 +245,35 @@
 .legend-color.alta {
   background-color: red;
 }
+
+mat-dialog-content ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+mat-dialog-content ul li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+mat-dialog-content ul li mat-icon {
+  margin-right: 8px;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.no-tasks {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.no-tasks button {
+  margin-top: 10px;
+}

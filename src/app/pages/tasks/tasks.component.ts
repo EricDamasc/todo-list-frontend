@@ -1,13 +1,14 @@
 import { Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Task } from '../../models/task.model';
 import { TaskService } from './task.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { CreateTaskDialogComponent } from '../../shared/create-task-dialog/create-task-dialog.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-tasks',
@@ -17,6 +18,17 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class TasksComponent implements OnInit {
   @Output() logOut = new EventEmitter<void>();
   tasks: Task[] = [];
+  paginatedTasks: Task[] = [];
+  taskActual: Task = {
+    task_id: '',
+    user_id: '',
+    title: '',
+    description: '',
+    completed: false,
+    created_at: '',
+    due_date: '',
+    priority: '',
+  };
   filteredTasks: Task[] = [];
   selectedPriority: string = '';
   searchText: string = '';
@@ -26,9 +38,14 @@ export class TasksComponent implements OnInit {
   userEmail: string = '';
 
   carregando: boolean = false;
+  pageSize: number = 10;
+  currentPage: number = 0;
 
+  @ViewChild('helpDialog') helpDialog!: TemplateRef<any>;
   @ViewChild('aboutDialog') aboutDialog!: TemplateRef<any>;
   @ViewChild('phoneNumberDialog') phoneNumberDialog!: TemplateRef<any>;
+  @ViewChild('confirmUpdateDialog') confirmUpdateDialog!: TemplateRef<any>;
+  confirmUpdateDialogRef!: MatDialogRef<any>;
 
   constructor(
     private taskService: TaskService,
@@ -49,6 +66,16 @@ export class TasksComponent implements OnInit {
     this.carregando = false;
   }
 
+  openHelpDialog(): void {
+    this.dialog.open(this.helpDialog, {
+      width: '100%',
+    });
+  }
+
+  closeHelpDialog(): void {
+    this.dialog.closeAll();
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
@@ -57,53 +84,26 @@ export class TasksComponent implements OnInit {
   applyFilters(): void {
     this.filteredTasks = this.tasks.filter(task => {
       const matchesPriority = this.selectedPriority ? task.priority === this.selectedPriority : true;
-      const matchesText = task.title.toLowerCase().includes(this.searchText.toLowerCase());
+      const matchesText = task.title ? task.title.toLowerCase().includes(this.searchText ? this.searchText.toLowerCase() : '') : false;
       return matchesPriority && matchesText;
     });
+    this.updatePaginatedTasks();
   }
 
-  // getTasks(): Observable<Task[]> {
-  //   this.carregando = true;
-  //  const tasks: Task[] = [
-  //     {
-  //       task_id: '1',
-  //       user_id: 'ericdamasc',
-  //       title: 'Tarefa 1',
-  //       description: 'Descrição da Tarefa 1',
-  //       completed: false,
-  //       created_at: '2025-02-01',
-  //       due_date: '2025-03-01',
-  //       priority: 'alta'
-  //     },
-  //     {
-  //       task_id: '2',
-  //       user_id: 'ericdamasc',
-  //       title: 'Tarefa 2',
-  //       description: 'Descrição da Tarefa 2',
-  //       completed: true,
-  //       created_at: '2025-02-02',
-  //       due_date: '2025-03-02',
-  //       priority: 'média'
-  //     },
-  //     {
-  //       task_id: '3',
-  //       user_id: 'ericdamasc',
-  //       title: 'Tarefa 3',
-  //       description: 'Descrição da Tarefa 3',
-  //       completed: false,
-  //       created_at: '2025-02-03',
-  //       due_date: '2025-03-03',
-  //       priority: 'baixa'
-  //     }
-  // ];
-  // this.carregando = false;
-  // this.showNotification('Tarefas carregadas com sucesso! ✅', 'success');
-  //   return of(tasks);
-  // }
+  onPageChange(event: PageEvent): void {
+    this.pageSize = event.pageSize;
+    this.currentPage = event.pageIndex;
+    this.updatePaginatedTasks();
+  }
+
+  updatePaginatedTasks(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedTasks = this.filteredTasks.slice(startIndex, endIndex);
+  }
 
   // Carregar todas as tarefas
   loadTasks(): void {
-    this.carregando = true;
     this.taskService.getTasks().subscribe({
       next: (tasks: Task[]) => {
         this.tasks = tasks;
@@ -112,7 +112,11 @@ export class TasksComponent implements OnInit {
           this.originalTaskState[task.task_id] = task.completed;
         });
         this.carregando = false;
-        this.showNotification('Tarefas carregadas com sucesso! ✅', 'success');
+        if (this.tasks.length === 0) {
+          this.showNotification('Nenhuma tarefa encontrada. ℹ️', 'success');
+        } else {
+          this.showNotification('Tarefas carregadas com sucesso! ✅', 'success');
+        }
       },
       error: (err: any) => {
         console.error('Erro ao carregar tarefas', err);
@@ -122,7 +126,6 @@ export class TasksComponent implements OnInit {
     });
   }
 
-  // Criar uma nova tarefa
   addTask(title: string, description: string, due_date: string, priority: string): void {
     if (!title.trim() || !priority.trim()) return;
   
@@ -140,7 +143,7 @@ export class TasksComponent implements OnInit {
     this.carregando = true;
     this.taskService.createTask(newTask).subscribe({
       next: (task: Task) => {
-        this.tasks.push(task);
+        this.loadTasks();
         this.applyFilters();
         this.carregando = false;
         this.showNotification('Tarefa adicionada com sucesso! ✅', 'success');
@@ -154,12 +157,11 @@ export class TasksComponent implements OnInit {
     });
   }
 
-  // Adicione um novo método para abrir o diálogo de edição
   openEditTaskDialog(task: Task): void {
     const dialogRef = this.dialog.open(CreateTaskDialogComponent, {
       width: '550px',
       autoFocus: true,
-      data: { task } // Passa a tarefa selecionada como dados para o diálogo
+      data: { task },
     });
   
     dialogRef.afterClosed().subscribe(result => {
@@ -171,12 +173,38 @@ export class TasksComponent implements OnInit {
   
   toggleCompleted(task: Task): void {
     task.completed = !task.completed;
-    // Verifique se o estado atual é diferente do estado original
-    this.taskChanged[task.task_id] = task.completed === this.originalTaskState[task.task_id];
+    this.taskChanged[task.task_id] = task.completed !== this.originalTaskState[task.task_id];
+    this.openConfirmUpdateDialog(task);
   }
-
+  
+  openConfirmUpdateDialog(task: Task): void {
+    this.taskActual = task;
+    this.confirmUpdateDialogRef = this.dialog.open(this.confirmUpdateDialog, {
+      width: '400px',
+      data: task
+    });
+  
+    this.confirmUpdateDialogRef.afterClosed().subscribe(result => {
+      if (!result) {
+        // Reverter a alteração se o modal for fechado sem confirmação
+        task.completed = this.originalTaskState[task.task_id];
+        this.taskChanged[task.task_id] = false;
+      }
+    });
+  }
+  
+  closeConfirmUpdateDialog(task: Task): void {
+    this.confirmUpdateDialogRef.close();
+    // Reverter a alteração se o modal for fechado sem confirmação
+    task.completed = this.originalTaskState[task.task_id];
+    this.taskChanged[task.task_id] = false;
+  }
+  
   updateTask(task: Task): void {
-    this.carregando = true;
+    task = task === null || task ? task : this.taskActual;
+    if (this.confirmUpdateDialogRef) {
+      this.confirmUpdateDialogRef.close();
+    }
     this.taskService.updateTask(task).subscribe({
       next: (updatedTask: Task) => {
         this.tasks = this.tasks.map((t) =>
@@ -207,13 +235,12 @@ export class TasksComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.carregando = true;
+        this.carregando = false;
         this.taskService.deleteTask(user_id, task_id).subscribe({
           next: () => {
-            this.tasks = this.tasks.filter((task) => task.task_id !== task_id);
-            this.carregando = false;
-            this.showNotification('Tarefa excluída com sucesso! ✅', 'success');
             this.loadTasks();
+            this.tasks = this.tasks.filter((task) => task.task_id !== task_id);
+            this.showNotification('Tarefa excluída com sucesso! ✅', 'success');
           },
           error: (err: any) => {
             this.carregando = false;

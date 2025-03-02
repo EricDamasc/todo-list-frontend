@@ -1,7 +1,19 @@
+<div class="spinner-overlay" *ngIf="carregando">
+  <mat-spinner></mat-spinner>
+</div>
 <div class="login-container">
   <h2>Gerenciador de Tarefas!</h2>
-  <p>Por favor, insira suas credenciais para acessar sua conta.</p>
-  <form (ngSubmit)="login()" #loginForm="ngForm">
+  <p *ngIf="isLoginMode">Por favor, insira suas credenciais para acessar sua conta.</p>
+  <p *ngIf="!isLoginMode">Por favor, insira suas informações para criar uma conta.</p>
+  
+  <form (ngSubmit)="onSubmit(authForm)" #authForm="ngForm">
+    <div *ngIf="!isLoginMode">
+      <mat-form-field class="full-width">
+        <mat-label>Nome de Usuário</mat-label>
+        <input matInput type="text" [(ngModel)]="username" name="username" required />
+      </mat-form-field>
+    </div>
+
     <mat-form-field class="full-width">
       <mat-label>Email</mat-label>
       <input matInput type="email" [(ngModel)]="email" name="email" required />
@@ -9,17 +21,22 @@
 
     <mat-form-field class="full-width">
       <mat-label>Senha</mat-label>
-      <input
-        matInput
-        type="password"
-        [(ngModel)]="password"
-        name="password"
-        required
-      />
+      <input matInput type="password" [(ngModel)]="password" name="password" required />
     </mat-form-field>
 
-    <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="!loginForm.form.valid" style="background-color: rgb(20, 95, 180);" [ngClass]="{'disabled-button': !loginForm.form.valid}">
-      Continuar
+    <div *ngIf="!isLoginMode">
+      <mat-form-field class="full-width">
+        <mat-label>Confirmar Senha</mat-label>
+        <input matInput type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required />
+      </mat-form-field>
+    </div>
+
+    <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="!authForm.form.valid" style="background-color: rgb(20, 95, 180);" [ngClass]="{'disabled-button': !authForm.form.valid}">
+      {{ isLoginMode ? 'Continuar' : 'Registrar' }}
     </button>
   </form>
+
+  <button mat-button color="primary" class="full-width" (click)="onSwitchMode()">
+    {{ isLoginMode ? 'Criar uma conta' : 'Já tenho uma conta' }}
+  </button>
 </div>
