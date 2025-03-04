@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://kloc449ejb.execute-api.us-east-1.amazonaws.com/api'; // Substitua pelo endpoint da AWS
+  private apiUrl = environment.apiUrl;
   private userEmail: string = '';
 
   constructor(private http: HttpClient) {}

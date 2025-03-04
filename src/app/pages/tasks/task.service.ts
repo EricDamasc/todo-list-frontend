@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task } from 'src/app/models/task.model';
+import { Task } from '../../models/task.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
-  private apiUrl = 'https://kloc449ejb.execute-api.us-east-1.amazonaws.com/api'; // Substitua com a URL do seu backend
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -27,7 +28,10 @@ export class TaskService {
   createTask(task: Task): Observable<Task> {
     const user_id = task.user_id;
     const params = new HttpParams().set('user_id', user_id);
-    return this.http.post<Task>(`${this.apiUrl}/tasks`, [task], { params, headers: this.getHeaders() });
+    return this.http.post<Task>(`${this.apiUrl}/tasks`, [task], {
+      params,
+      headers: this.getHeaders(),
+    });
   }
 
   updateTask(task: Task): Observable<Task> {
@@ -38,6 +42,9 @@ export class TaskService {
 
   deleteTask(user_id: string, id: string): Observable<void> {
     const params = new HttpParams().set('user_id', user_id);
-    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`, { params, headers: this.getHeaders() });
+    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`, {
+      params,
+      headers: this.getHeaders(),
+    });
   }
 }

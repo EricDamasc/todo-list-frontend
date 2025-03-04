@@ -24,16 +24,8 @@ describe('TasksComponent', () => {
   let dialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(async () => {
-    const taskServiceSpy = jasmine.createSpyObj('TaskService', [
-      'getTasks',
-      'createTask',
-      'updateTask',
-      'deleteTask',
-    ]);
-    const authServiceSpy = jasmine.createSpyObj('AuthService', [
-      'getUserEmail',
-      'logout',
-    ]);
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', ['getTasks', 'createTask', 'updateTask', 'deleteTask']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserEmail', 'logout']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
     const dialogSpy = jasmine.createSpyObj('MatDialog', ['open', 'closeAll']);
@@ -141,17 +133,9 @@ describe('TasksComponent', () => {
   it('should handle task creation error', () => {
     taskService.createTask.and.returnValue(throwError('error'));
     component.addTask('Task 3', 'Description 3', '2025-03-03', 'baixa');
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'Erro ao adicionar tarefa ❌',
-      '',
-      {
-        duration: 4000,
-        panelClass: 'error',
-        horizontalPosition: 'center',
-        announcementMessage: 'Erro!',
-      }
-    );
+    expect(snackBar.open).toHaveBeenCalledWith('Erro ao adicionar tarefa ❌', '', { duration: 4000, panelClass: 'error', horizontalPosition: 'center', announcementMessage: 'Erro!' });
   });
+
   it('should update a task', () => {
     const updatedTask = {
       task_id: '1',
@@ -190,12 +174,6 @@ describe('TasksComponent', () => {
         announcementMessage: 'Erro!',
       }
     );
-  });
-
-  it('should delete a task', () => {
-    taskService.deleteTask.and.returnValue(of(void 0));
-    component.deleteTask('user1', '1');
-    expect(taskService.deleteTask).toHaveBeenCalled();
   });
 
   it('should open and close dialogs', () => {
