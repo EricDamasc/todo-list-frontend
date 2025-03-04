@@ -53,6 +53,48 @@ jobs:
       - name: 🏗️ Construir o projeto
         run: npm run build:prod
 
+  create-pr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/feature/')
+    steps:
+      - name: 🔄 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Criar PR para develop
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: develop
+          title: "Merge feature branch into develop"
+          body: "Este PR foi criado automaticamente para mergear a branch feature na develop."
+
+      - name: Criar PR para main
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          title: "Merge feature branch into main"
+          body: "Este PR foi criado automaticamente para mergear a branch feature na main."
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: 🔄 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 📦 Instalar dependências
+        run: npm install
+
+      - name: 🧪 Rodar testes
+        run: npm run test:ci
+
+      - name: 🏗️ Construir o projeto
+        run: npm run build:prod
+
       - name: 🔐 Configurar credenciais AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
