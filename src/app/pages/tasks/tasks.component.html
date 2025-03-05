@@ -208,9 +208,11 @@
         </div>
       </mat-card-footer>
     </mat-card>
+  </ng-container>
+  <div class="paginator-container">
     <mat-paginator [length]="filteredTasks.length" [pageSize]="10" [pageSizeOptions]="[5, 10, 20]" (page)="onPageChange($event)">
     </mat-paginator>
-  </ng-container>
+  </div>
 
   <ng-template #noTasksTemplate>
     <div class="no-tasks">

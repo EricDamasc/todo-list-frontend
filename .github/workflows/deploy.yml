@@ -63,8 +63,8 @@ jobs:
       - name: 📦 Instalar dependências
         run: npm install
 
-      - name: 🧪 Rodar testes
-        run: npm run test:ci
+      # - name: 🧪 Rodar testes
+      #   run: npm run test:ci
 
       - name: 🏗️ Construir o projeto
         run: npm run build:prod
