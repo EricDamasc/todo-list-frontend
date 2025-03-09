@@ -67,7 +67,7 @@ npm install
 ng serve
 ```
 
-4. Abra o navegador e acesse `https://todo-list-frontend-tan.vercel.app/`.
+4. Abra o navegador e acesse `http://localhost:4200`.
 
 ## Uso
 
@@ -87,17 +87,6 @@ ng serve
 
 1. Use os campos de filtro para filtrar tarefas por título e prioridade.
 
-## Contribuição
-
-1. Faça um fork do projeto.
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`).
-3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`).
-4. Faça push para a branch (`git push origin feature/nova-feature`).
-5. Abra um Pull Request.
-
-## Licença
-
-Este projeto está licenciado sob a Licença MIT. Veja o arquivo LICENSE para mais detalhes.
 
 ## Contato
 
@@ -114,35 +103,3 @@ Este projeto está licenciado sob a Licença MIT. Veja o arquivo LICENSE para ma
 - **models**: Contém os modelos de dados, como `task.model.ts`.
 - **assets**: Contém os arquivos estáticos, como imagens e ícones.
 - **environments**: Contém os arquivos de configuração de ambiente.
-
-### Configuração do Backend
-
-O backend deste projeto é desenvolvido usando FastAPI e Lambda. Certifique-se de configurar corretamente o backend para que ele funcione com o frontend.
-
-### Autenticação
-
-A autenticação é feita usando JWT (JSON Web Tokens). Certifique-se de que o backend está configurado para gerar e validar tokens JWT.
-
-### Estilização
-
-A estilização é feita usando SCSS. Certifique-se de que o Angular Material está configurado corretamente para usar os temas e estilos personalizados.
-
-### Testes
-
-Para executar os testes, use o comando:
-
-```bash
-ng test
-```
-
-Certifique-se de que todos os testes estão passando antes de fazer um commit.
-
-### Deploy
-
-Para fazer o deploy do projeto, use o comando:
-
-```bash
-ng build --prod
-```
-
-Isso gerará os arquivos de build na pasta dist. Você pode então fazer o deploy desses arquivos em um servidor web.
