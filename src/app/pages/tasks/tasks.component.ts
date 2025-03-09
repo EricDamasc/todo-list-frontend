@@ -304,22 +304,38 @@ export class TasksComponent implements OnInit {
   shareTaskViaWhatsApp(task: Task): void {
     const dialogRef = this.dialog.open(this.phoneNumberDialog, {
       width: '300px',
-      autoFocus: true
+      autoFocus: true,
     });
-  
+
     dialogRef.afterClosed().subscribe(() => {
       const phoneNumber = this.phoneForm.get('phoneNumber')?.value;
       if (phoneNumber) {
-        const message = `Tarefa: ${task.title}\nDescrição: ${task.description}\nData de criação: ${task.created_at}\nPrevisão de entrega: ${task.due_date}\nPrioridade: ${task.priority}\nConcluída: ${task.completed ? 'Sim' : 'Não'}\nID do Usuário: ${task.user_id}`;
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        const message = `**Título**: ${task.title}\n**Descrição**: ${
+          task.description
+        }\n**Data de criação**: ${task.created_at}\n**Previsão de entrega**: ${
+          task.due_date
+        }\n**Prioridade**: ${task.priority}\n**Concluída**: ${
+          task.completed ? 'Sim' : 'Não'
+        }\n**ID do Usuário**: ${task.user_id}`;
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+          message
+        )}`;
         window.open(whatsappUrl, '_blank');
       }
     });
   }
 
   shareTaskViaEmail(task: Task): void {
-    const message = `Tarefa: ${task.title}\nDescrição: ${task.description}\nData de criação: ${task.created_at}\nPrevisão de entrega: ${task.due_date}\nPrioridade: ${task.priority}\nConcluída: ${task.completed ? 'Sim' : 'Não'}\nID do Usuário: ${task.user_id}`;
-    const emailUrl = `mailto:?subject=${encodeURIComponent('Detalhes da Tarefa: ' + task.title)}&body=${encodeURIComponent(message)}`;
+    const message = `Título: ${task.title}\nDescrição: ${
+      task.description
+    }\nData de criação: ${task.created_at}\nPrevisão de entrega: ${
+      task.due_date
+    }\nPrioridade: ${task.priority}\nConcluída: ${
+      task.completed ? 'Sim' : 'Não'
+    }\nID do Usuário: ${task.user_id}`;
+    const emailUrl = `mailto:?subject=${encodeURIComponent(
+      'Detalhes da Tarefa: ' + task.title
+    )}&body=${encodeURIComponent(message)}`;
     window.open(emailUrl, '_blank');
   }
 
