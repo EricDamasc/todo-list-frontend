@@ -310,13 +310,13 @@ export class TasksComponent implements OnInit {
     dialogRef.afterClosed().subscribe(() => {
       const phoneNumber = this.phoneForm.get('phoneNumber')?.value;
       if (phoneNumber) {
-        const message = `**Título**: ${task.title}\n**Descrição**: ${
+        const message = `*Título*: ${task.title}\n*Descrição*: ${
           task.description
-        }\n**Data de criação**: ${task.created_at}\n**Previsão de entrega**: ${
+        }\n*Data de criação*: ${task.created_at}\n*Previsão de entrega*: ${
           task.due_date
-        }\n**Prioridade**: ${task.priority}\n**Concluída**: ${
+        }\n*Prioridade*: ${task.priority}\n*Concluída*: ${
           task.completed ? 'Sim' : 'Não'
-        }\n**ID do Usuário**: ${task.user_id}`;
+        }\n*ID do Usuário*: ${task.user_id}`;
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
           message
         )}`;
