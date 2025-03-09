@@ -67,7 +67,7 @@ npm install
 ng serve
 ```
 
-4. Abra o navegador e acesse `http://localhost:4200`.
+4. Abra o navegador e acesse `https://todo-list-frontend-tan.vercel.app/`.
 
 ## Uso
 
